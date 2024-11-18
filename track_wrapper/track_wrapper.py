@@ -136,8 +136,8 @@ def setup_files():
     and copy into TRACK directory for use during preprocessing and tracking.
     """
     # check if TRACK is installed
-    if os.path.isdir(str(Path.home()) + "/track-master") == False:
-        raise Exception("track-master is not installed.")    
+    if os.path.isdir(str(Path.home()) + "/TRACK") == False:
+        raise Exception("TRACK is not installed.")    
     
     # edit RUNDATIN files
     for var in ['MSLP', 'MSLP_A', 'VOR', 'VOR_A']:
@@ -149,13 +149,13 @@ def setup_files():
 
     # copy files into local TRACK directory
     os.system("cp track_wrapper/trackdir/* " + str(Path.home()) +
-                "/track-master/") # calcvor and specfilt files
+                "/TRACK/") # calcvor and specfilt files
     os.system("cp track_wrapper/indat/RUNDATIN.* " + str(Path.home()) +
-                "/track-master/indat") # RUNDATIN files
+                "/TRACK/indat") # RUNDATIN files
     os.system("cp track_wrapper/data/* " + str(Path.home()) +
-                "/track-master/data") # initial and adapt.dat0, zone.dat0
+                "/TRACK/data") # initial and adapt.dat0, zone.dat0
     os.system("cp track_wrapper/tr2nc_new.tar " + str(Path.home()) +
-                "/track-master/utils") # for TR2NC setup
+                "/TRACK/utils") # for TR2NC setup
     return
 
 def setup_tr2nc():
@@ -163,14 +163,14 @@ def setup_tr2nc():
     Set up and compile TR2NC for converting TRACK output to NetCDF.
     """
     # check if tr2nc_new.tar file exists
-    if os.path.isfile(str(Path.home()) + "/track-master/utils/tr2nc_new.tar") == False:
+    if os.path.isfile(str(Path.home()) + "/TRACK/utils/tr2nc_new.tar") == False:
         raise Exception("Please run the track_wrapper.setup_files function first.")
 
     os.system("cp track_wrapper/tr2nc_mslp.meta.elinor " + str(Path.home()) +
-                "/track-master/utils")
+                "/TRACK/utils")
 
     cwd = os.getcwd()
-    os.chdir(str(Path.home()) + "/track-master/utils")
+    os.chdir(str(Path.home()) + "/TRACK/utils")
     os.system("mv TR2NC OLD_TR2NC")
     os.system("tar xvf tr2nc_new.tar")
     os.system("mv tr2nc_mslp.meta.elinor TR2NC/tr2nc_mslp.meta.elinor")
@@ -178,7 +178,7 @@ def setup_tr2nc():
     os.environ["CC"] = "gcc"
     os.environ["FC"] = "gfortran"
 
-    os.chdir(str(Path.home()) + "/track-master")
+    os.chdir(str(Path.home()) + "/TRACK")
     os.system("make utils")
 
     os.chdir(cwd)
@@ -217,12 +217,12 @@ def steps_to_dates(track_output_dir, filename, ERA5=False, track_mins=False):
         # count command: [filname] [Lat.] [Lng.] [Rad.] [Genesis (0)/Lysis (1)/Passing(2)/Passing Time(3)/All Times(4)] [Negate (1)] [Start Time, YYYYMMDDHH] [tstep]
         tr_fname=f"{track_output_dir}/tr_trs_neg"
         os.system("gzip -d " + tr_fname + ".gz")
-        count=str(Path.home()) + "/track-master/utils/bin/count " + tr_fname + " 0 0 5 4 0 "  + timestring + " " + str(timedelta)
+        count=str(Path.home()) + "/TRACK/utils/bin/count " + tr_fname + " 0 0 5 4 0 "  + timestring + " " + str(timedelta)
         os.system(f"{count} ")
 
         ff_fname=f"{track_output_dir}/ff_trs_neg"
         os.system("gzip -d " + ff_fname + ".gz")
-        count=str(Path.home()) + "/track-master/utils/bin/count " + ff_fname + " 0 0 5 4 0 "  + timestring + " " + str(timedelta)
+        count=str(Path.home()) + "/TRACK/utils/bin/count " + ff_fname + " 0 0 5 4 0 "  + timestring + " " + str(timedelta)
         os.system(f"{count} ")
 
         # move files to dates subdirectories
@@ -233,12 +233,12 @@ def steps_to_dates(track_output_dir, filename, ERA5=False, track_mins=False):
         # count command: [filname] [Lat.] [Lng.] [Rad.] [Genesis (0)/Lysis (1)/Passing(2)/Passing Time(3)/All Times(4)] [Negate (1)] [Start Time, YYYYMMDDHH] [tstep]
         tr_fname=f"{track_output_dir}/tr_trs_pos"
         os.system("gzip -d " + tr_fname + ".gz")
-        count=str(Path.home()) + "/track-master/utils/bin/count " + tr_fname + " 0 0 5 4 0 "  + timestring + " " + str(timedelta)
+        count=str(Path.home()) + "/TRACK/utils/bin/count " + tr_fname + " 0 0 5 4 0 "  + timestring + " " + str(timedelta)
         os.system(f"{count} ")
 
         ff_fname=f"{track_output_dir}/ff_trs_pos"
         os.system("gzip -d " + ff_fname + ".gz")
-        count=str(Path.home()) + "/track-master/utils/bin/count " + ff_fname + " 0 0 5 4 0 "  + timestring + " " + str(timedelta)
+        count=str(Path.home()) + "/TRACK/utils/bin/count " + ff_fname + " 0 0 5 4 0 "  + timestring + " " + str(timedelta)
         os.system(f"{count} ")
 
         # move files to dates subdirectories
@@ -458,7 +458,7 @@ def calc_vorticity(uv_file, outfile, copy_file=True, cmip6=True):
 
     outfile : string
         Desired base name of .dat vorticity file that will be output into the
-        track-master/indat directory.
+        TRACK/indat directory.
 
     copy_file : boolean, optional
         Whether or not the uv_file will be copied into the TRACK directory. This
@@ -473,7 +473,7 @@ def calc_vorticity(uv_file, outfile, copy_file=True, cmip6=True):
     # check if outfile is base name
     if (os.path.basename(outfile) != outfile) or (outfile[-4:] != '.dat'):
         raise Exception("Please input .dat file basename only. The output file " +
-                            "will be found in the track-master/indat directory.")
+                            "will be found in the TRACK/indat directory.")
 
     # gather information about data
     year = cdo.showyear(input=uv_file)[0]
@@ -502,12 +502,12 @@ def calc_vorticity(uv_file, outfile, copy_file=True, cmip6=True):
     # if copy_file == True: # copy input data to TRACK/indat directory
 
     #     os.system("cp " + uv_file + " " + str(Path.home()) + 
-    #                 "/track-master/indat/" + tempname)
-    # else: # if uv_file is already in the track-master/indat directory
+    #                 "/TRACK/indat/" + tempname)
+    # else: # if uv_file is already in the TRACK/indat directory
 
-    #     os.system("ln -fs " + uv_file + " " + str(Path.home()) + "/track-master/indat/" + tempname)
+    #     os.system("ln -fs " + uv_file + " " + str(Path.home()) + "/TRACK/indat/" + tempname)
         
-    os.chdir(str(Path.home()) + "/track-master") # change to track-master directory
+    os.chdir(str(Path.home()) + "/TRACK") # change to TRACK directory
 
     # generate input file and calculate vorticity using TRACK
     os.system("sed -e \"s/VAR1/"+ u_name + "/;s/VAR2/" + v_name + "/;s/NX/" +
@@ -608,11 +608,11 @@ def track_mslp(input, outdirectory, NH=True, ysplit=False, cmip6=True):
     # Link data to TRACK directory
     print('Linking data to TRACK/indat')
     filled=input_egf
-    os.system("ln -fs '" + filled + "' " + str(Path.home()) + "/track-master/indat/" + input_basename)
+    os.system("ln -fs '" + filled + "' " + str(Path.home()) + "/TRACK/indat/" + input_basename)
 
     # change working directory
     cwd = os.getcwd()
-    os.chdir(str(Path.home()) + "/track-master")
+    os.chdir(str(Path.home()) + "/TRACK")
 
     # Years
     years = cdo.showyear(input=filled)[0].split()
@@ -814,11 +814,11 @@ def track_uv_vor850(infile, outdirectory, infile2='none', NH=True, ysplit=False,
     # Link data to TRACK directory
     print('Linking data to TRACK/indat')
     filled=input_egf
-    os.system("ln -fs '" + filled + "' " + str(Path.home()) + "/track-master/indat/" + input_basename)
+    os.system("ln -fs '" + filled + "' " + str(Path.home()) + "/TRACK/indat/" + input_basename)
 
     # change working directory
     cwd = os.getcwd()
-    os.chdir(str(Path.home()) + "/track-master")
+    os.chdir(str(Path.home()) + "/TRACK")
 
     # Years
     years = cdo.showyear(input=filled)[0].split()
@@ -952,12 +952,12 @@ def track_uv_vor850(infile, outdirectory, infile2='none', NH=True, ysplit=False,
 #     years = cdo.showyear(input=input)[0].split()
 
 #     # create link of data to TRACK indat directory
-#     os.system("ln -fs '" + input + "' " + str(Path.home()) + "/track-master/indat/" + input_basename)
+#     os.system("ln -fs '" + input + "' " + str(Path.home()) + "/TRACK/indat/" + input_basename)
 #     print("Data linked into TRACK/indat directory.")
 
 #     # change working directory
 #     cwd = os.getcwd()
-#     os.chdir(str(Path.home()) + "/track-master")
+#     os.chdir(str(Path.home()) + "/TRACK")
 
 #     if NH == True:
 #         hemisphere = "NH"
@@ -1117,11 +1117,11 @@ def track_uv_vor850(infile, outdirectory, infile2='none', NH=True, ysplit=False,
 
 #     # create link of data to TRACK indat directory
 #     print('Linking data to TRACK/indat')
-#     os.system("ln -fs '" + filled + "' " + str(Path.home()) + "/track-master/indat/" + input_basename)
+#     os.system("ln -fs '" + filled + "' " + str(Path.home()) + "/TRACK/indat/" + input_basename)
 
 #     # change working directory
 #     cwd = os.getcwd()
-#     os.chdir(str(Path.home()) + "/track-master")
+#     os.chdir(str(Path.home()) + "/TRACK")
 
 #     years = cdo.showyear(input=filled)[0].split()
 #     print("Years: ", years)
@@ -1261,7 +1261,7 @@ def tr2nc_mslp(input):
     """
     fullpath = os.path.abspath(input)
     cwd = os.getcwd()
-    os.chdir(str(Path.home()) + "/track-master/utils/bin")
+    os.chdir(str(Path.home()) + "/TRACK/utils/bin")
     os.system("tr2nc '" + fullpath + "' s ../TR2NC/tr2nc_mslp.meta.elinor")
     os.chdir(cwd)
     return
@@ -1279,7 +1279,7 @@ def tr2nc_vor(input):
     """
     fullpath = os.path.abspath(input)
     cwd = os.getcwd()
-    os.chdir(str(Path.home()) + "/track-master/utils/bin")
+    os.chdir(str(Path.home()) + "/TRACK/utils/bin")
     os.system("tr2nc '" + fullpath + "' s ../TR2NC/tr2nc.meta.elinor")
     os.chdir(cwd)
     return
@@ -1314,10 +1314,10 @@ def track_stats(dirname,tracksname,ext):
     """
 
     
-    trackmaster=(str(Path.home()) + "/track-master/")
-    utils=(str(Path.home()) + "/track-master/utils/")
-    indat=(str(Path.home()) + "/track-master/indat/")
-    outdat=(str(Path.home()) + "/track-master/outdat/")
+    trackmaster=(str(Path.home()) + "/TRACK/")
+    utils=(str(Path.home()) + "/TRACK/utils/")
+    indat=(str(Path.home()) + "/TRACK/indat/")
+    outdat=(str(Path.home()) + "/TRACK/outdat/")
     total=dirname + "/total/"
 
     if not os.path.exists(total):
@@ -1432,10 +1432,10 @@ def add_mean_field(infile, outdirectory, fieldname, radius, NH=True, ysplit=Fals
 
     # link data indat
     print('Linking data to TRACK/indat')
-    os.system("ln -fs '" + infile_e + "' " + str(Path.home()) + "/track-master/indat/.")    
+    os.system("ln -fs '" + infile_e + "' " + str(Path.home()) + "/TRACK/indat/.")    
 
     # setup input file
-    inputfile_template="/home/zappa/track-master/indat/addprec_template.in"
+    inputfile_template="/home/zappa/TRACK/indat/addprec_template.in"
     
     # revise NY
     
