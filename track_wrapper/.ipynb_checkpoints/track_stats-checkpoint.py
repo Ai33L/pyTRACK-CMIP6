@@ -10,11 +10,14 @@ cdo = Cdo()
 
 __all__ = ['track_stats']
 
-def track_stats(outdir, season='DJF', extended='True'):
+def track_stats(indir, outdir, season='JJA', extended=True, adaptive_smooth=True):
+
+    if os.path.isdir(outdir)==False:
+        os.system('mkdir '+outdir)
 
     ## temporary - getting the files in manually
 
-    path='/gws/nopw/j04/csgap/abel/TRACK_curr/ctrl_DJF_ext/'
+    path='/gws/nopw/j04/csgap/abel/TRACK_curr/'+indir+'/'
     filelist=glob.glob(path+'*')
 
     if season=='DJF':
@@ -38,7 +41,11 @@ def track_stats(outdir, season='DJF', extended='True'):
             print("ERROR! - ASh")
             
         for i in range(3):
-            os.system("sed -e \"s+FR_ST+"+ str(start[i]) + "+;s+FR_END+" + str(end[i]) + "+;s+FILE_NAME+" + str(file) + "+\" STATS_template.in > STATS_mod.in")
+            if adaptive_smooth:
+                os.system("sed -e \"s+FR_ST+"+ str(start[i]) + "+;s+FR_END+" + str(end[i]) + "+;s+FILE_NAME+" + str(file) + "+\" STATS_template.in > STATS_mod.in")
+            else:
+                os.system("sed -e \"s+FR_ST+"+ str(start[i]) + "+;s+FR_END+" + str(end[i]) + "+;s+FILE_NAME+" + str(file) + "+\" STATS_template_unsmooth.in > STATS_mod.in")
+            
             os.system("bin/track.linux < STATS_mod.in")
 
             stat_filename=(e[len(path):]+'_'+file_ext[i])+'.nc'

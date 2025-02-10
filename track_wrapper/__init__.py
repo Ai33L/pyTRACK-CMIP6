@@ -3,3 +3,5 @@
 from .track_wrapper import *
 from .track_stats import *
 from .track_wrapper_generic import *
+from .composite import *
+from .main import *

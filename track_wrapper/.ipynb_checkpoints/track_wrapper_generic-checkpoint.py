@@ -4,10 +4,11 @@ from netCDF4 import Dataset
 from pathlib import Path
 from math import ceil
 import subprocess
+import xarray as xr
 
 cdo = Cdo()
 
-__all__ = ['track_uv']
+__all__ = ['track_uv', 'format_data']
 
 class cmip6_indat(object):
     """Class to obtain basic information about the CMIP6 input data."""
@@ -277,7 +278,7 @@ def track_uv(infile, outdirectory, infile2='none', NH=True, ysplit=False, shift=
         If true, converts TRACK output to netCDF format using TR2NC utility.
 
     shift : boolean, optional
-        Pass true if data is shifted to track for DJF -- shifts time back a month after tracking
+        Pass true if data is shifted to track for DJF -- shifts time start time back to november after tracking
     """
 
     # set outdir -- full path the output track directory
@@ -329,13 +330,18 @@ def track_uv(infile, outdirectory, infile2='none', NH=True, ysplit=False, shift=
         regrid_cmip6(input_e, input_eg)
     os.system("rm " + dir_path+"/uv_merged_extr.nc")
 
-    # fill missing values
+    # fill missing values, modified to be xarray for now - ASh
     input_egf = input_eg[:-3] + "_filled.nc"
-    os.system("ncatted -a _FillValue,,d,, -a missing_value,,d,, " + input_eg +
-              " " + input_egf)
-    print("Filled missing values, if any.")
-    os.system("rm " + dir_path+"/uv_merged_extr_gaussian.nc")
 
+    os.system("cdo setmisstoc,0 " + input_eg +
+              " " + input_egf)
+    
+    os.system("ncatted -a _FillValue,,d,, -a missing_value,,d,, " + input_egf)
+    
+        
+    # print("Filled missing values, if any.")
+    os.system("rm " + dir_path+"/uv_merged_extr_gaussian.nc")
+    
     #### Files created so far - 
     # uv_merged.nc -- removed
     # uv_merged_extr.nc -- removed
@@ -351,6 +357,7 @@ def track_uv(infile, outdirectory, infile2='none', NH=True, ysplit=False, shift=
     data = cmip6_indat(input_final)
     nx, ny = data.get_nx_ny()
 
+    #return
     ################## END OF PROCESSING ####################################################################
     
     # Link data to TRACK directory
@@ -495,3 +502,33 @@ def tr2nc_vor(input, timestring, datetime, timedelta):
     os.system("tr2nc '" + fullpath + "' s ../TR2NC/tr2nc.meta.elinor_mod")
     os.chdir(cwd)
     return
+
+
+def format_data(indir, outdir, create_seasonal=False):
+    
+    # custom function to extract out uv data from generic climate model data
+    # changes variable names and adds units to match CMIP conventions
+
+    os.chdir(indir)
+    files=os.listdir()
+
+    for f in files[20:]:
+        print(f)
+        dat=xr.open_dataset(f)
+        dat=dat.transpose("time", "plev", "lat", "lon")
+        dat.lon.attrs["units"]="degrees_east"; dat.lat.attrs["units"]="degrees_north"
+        dat=dat[['U', 'V']].rename_vars({'U':'ua', 'V':'va'})#.drop_vars(['plev'])
+        dat=dat.sel(plev=85000)
+        dat.to_netcdf(outdir+'/corr_'+f, unlimited_dims={'time'})
+
+    os.chdir('/gws/nopw/j04/csgap/abel')
+    os.chdir(outdir)
+    
+    os.system('cdo mergetime *.nc combined.nc')
+
+    # temporary - things are written manually here
+    if create_seasonal:
+        os.system('cdo selmon,5/9 combined.nc JJA_ext.nc')
+        os.system('ncap2 -s \'time+=61\' combined.nc combined_shifted.nc')
+        os.system('cdo selmon,1/5 combined_shifted.nc DJF_ext.nc')
+        os.system('rm combined_shifted.nc')
