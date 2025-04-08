@@ -5,6 +5,7 @@ from pathlib import Path
 from math import ceil
 import subprocess
 import xarray as xr
+import shutil
 
 cdo = Cdo()
 
@@ -18,8 +19,6 @@ class cmip6_indat(object):
 
         Parameters
         ----------
-
-
         filename : string
             Filename of a .nc file containing CMIP6 sea level pressure or wind
             velocity data.
@@ -249,7 +248,7 @@ def calc_vorticity(uv_file, outfile, copy_file=True):
     return
     
 
-def track_uv(infile, outdirectory, infile2='none', NH=True, ysplit=False, shift=False):
+def track_uv(infile, outdirectory, infile2='none', NH=True, ysplit=True, shift=False):
 
     """
     Calculate 850 hPa vorticity from generic horizontal wind velocity data
@@ -509,17 +508,22 @@ def format_data(indir, outdir, create_seasonal=False):
     # custom function to extract out uv data from generic climate model data
     # changes variable names and adds units to match CMIP conventions
 
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+
     os.chdir(indir)
     files=os.listdir()
 
-    for f in files[20:]:
-        print(f)
-        dat=xr.open_dataset(f)
-        dat=dat.transpose("time", "plev", "lat", "lon")
-        dat.lon.attrs["units"]="degrees_east"; dat.lat.attrs["units"]="degrees_north"
-        dat=dat[['U', 'V']].rename_vars({'U':'ua', 'V':'va'})#.drop_vars(['plev'])
-        dat=dat.sel(plev=85000)
-        dat.to_netcdf(outdir+'/corr_'+f, unlimited_dims={'time'})
+    for f in files[:]:
+        if f[-2:]=='nc':
+            print(f)
+            if not (os.path.exists(outdir+'/corr_'+f)):
+                dat=xr.open_dataset(f)
+                dat=dat.transpose("time", "plev", "lat", "lon")
+                dat.lon.attrs["units"]="degrees_east"; dat.lat.attrs["units"]="degrees_north"
+                dat=dat[['U', 'V']].rename_vars({'U':'ua', 'V':'va'})#.drop_vars(['plev'])
+                dat=dat.sel(plev=85000)
+                dat.to_netcdf(outdir+'/corr_'+f, unlimited_dims={'time'})
 
     os.chdir('/gws/nopw/j04/csgap/abel')
     os.chdir(outdir)

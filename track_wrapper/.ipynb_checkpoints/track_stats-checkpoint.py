@@ -10,7 +10,7 @@ cdo = Cdo()
 
 __all__ = ['track_stats']
 
-def track_stats(indir, outdir, season='JJA', extended=True, adaptive_smooth=True):
+def track_stats(indir, outdir, season='JJA', extended=True, adaptive_smooth=True, cyclone=True):
 
     if os.path.isdir(outdir)==False:
         os.system('mkdir '+outdir)
@@ -33,12 +33,20 @@ def track_stats(indir, outdir, season='JJA', extended=True, adaptive_smooth=True
 
     for e in filelist[:]:
 
-        if e[len(path):len(path)+2]=='NH':
-            file=e+'/ff_trs_pos'
-        elif e[len(path):len(path)+2]=='SH':
-            file=e+'/ff_trs_neg'
+        if cyclone:
+            if e[len(path):len(path)+2]=='NH':
+                file=e+'/ff_trs_pos'
+            elif e[len(path):len(path)+2]=='SH':
+                file=e+'/ff_trs_neg'
+            else:
+                print("ERROR! - ASh")
         else:
-            print("ERROR! - ASh")
+            if e[len(path):len(path)+2]=='NH':
+                file=e+'/ff_trs_neg'
+            elif e[len(path):len(path)+2]=='SH':
+                file=e+'/ff_trs_pos'
+            else:
+                print("ERROR! - ASh")
             
         for i in range(3):
             if adaptive_smooth:
