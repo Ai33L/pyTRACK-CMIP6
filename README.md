@@ -1,6 +1,7 @@
 # pyTRACK-CMIP6: A Python Wrapper Library to Adapt TRACK for CMIP6 Input and Extratropical Cyclone Analysis
 
 This the version of the package used for the stormtrack analysis of the first part of my PhD - ASh
+
 Dated 24-05-2025
 
 [TRACK](http://www.nerc-essc.ac.uk/~kih/TRACK/Track.html) is a powerful storm tracking software package that automatically identifies and tracks storm features in model and observational data. pyTRACK-CMIP6 is intended to be a Python 3 wrapper for using TRACK on mean sea level pressure (MSLP) data and 850 hPa vorticity data, calculated from horizontal winds, from phase 6 of the Coupled Model Intercomparison Project (CMIP6). pyTRACK-CMIP6 also includes functionality to run TRACK on ERA5 reanalysis MSLP and vorticity data calculated from horizontal winds.
