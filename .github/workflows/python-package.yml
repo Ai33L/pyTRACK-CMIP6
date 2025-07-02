@@ -49,7 +49,7 @@ jobs:
       run: |
         pip install flake8
         # stop the build if there are Python syntax errors or undefined names
-        flake8 --ignore=E501,E226,W504,W605 gfs_dynamical_core/ --count --show-source --statistics
+        flake8 --ignore=E501,E226,W504,W605 pyTRACK/ --count --show-source --statistics
     - name: Build gfs
       run: |
             if [ "$RUNNER_OS" == "Linux" ]; then
