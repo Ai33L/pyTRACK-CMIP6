@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: [py38, py39, py310]
+        python-version: [py310]
         # python-version: [py37, py38]
     steps:
     - uses: actions/checkout@v2
