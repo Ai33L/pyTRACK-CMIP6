@@ -52,15 +52,5 @@ jobs:
     #     flake8 --ignore=E501,E226,W504,W605 pyTRACK/ --count --show-source --statistics
     - name: Build pyTRACK
       run: |
-            if [ "$RUNNER_OS" == "Linux" ]; then
-              gfortran --version
               tox -e ${{ matrix.python-version }}
-            elif [ "$RUNNER_OS" == "macOS" ]; then
-              # which gcc #/usr/bin/gcc
-              # which gfortran
-              CLIMT_ARCH=Darwin tox -e ${{ matrix.python-version }}
-            else 
-              echo "$RUNNER_OS not supported"
-              exit 1
-            fi
       shell: bash
