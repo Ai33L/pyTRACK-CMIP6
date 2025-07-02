@@ -6,7 +6,7 @@ from math import ceil
 import subprocess
 import glob
 
-cdo = Cdo()
+# cdo = Cdo()
 
 __all__ = ['track_stats']
 
