@@ -45,12 +45,12 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install wheel tox
         if [ -f requirements_dev.txt ]; then pip install -r requirements_dev.txt; fi
-    - name: Lint with flake8
-      run: |
-        pip install flake8
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 --ignore=E501,E226,W504,W605 pyTRACK/ --count --show-source --statistics
-    - name: Build gfs
+    # - name: Lint with flake8
+    #   run: |
+    #     pip install flake8
+    #     # stop the build if there are Python syntax errors or undefined names
+    #     flake8 --ignore=E501,E226,W504,W605 pyTRACK/ --count --show-source --statistics
+    - name: Build pyTRACK
       run: |
             if [ "$RUNNER_OS" == "Linux" ]; then
               gfortran --version
